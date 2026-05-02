@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ollie's Revision Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f11;
+    --surface: #1a1a1f;
+    --surface2: #222228;
+    --border: #2e2e38;
+    --text: #f0f0f0;
+    --muted: #6b6b7a;
+    --accent: #7c6af7;
+    --accent-dim: #2d2850;
+    --green: #3ecf8e;
+    --green-dim: #0d2e20;
+    --amber: #f5a623;
+    --amber-dim: #2e1f00;
+    --red: #f56565;
+    --red-dim: #2e0f0f;
+    --blue: #60a5fa;
+    --blue-dim: #0d1f3c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+    padding: 0 0 60px;
+  }
+  header {
+    padding: 28px 24px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-left h1 {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+  }
+  .header-left p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .total-pill {
+    background: var(--accent-dim);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-family: 'DM Mono', monospace;
+  }
+  .main { padding: 20px 24px; max-width: 700px; }
+
+  /* date bar */
+  .date-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .date-bar label { font-size: 13px; color: var(--muted); }
+  .date-bar input[type=date] {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    padding: 7px 12px;
+    cursor: pointer;
+  }
+  .date-bar input[type=date]:focus { outline: none; border-color: var(--accent); }
+
+  /* add session */
+  .add-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 24px;
+  }
+  .add-card h2 { font-size: 14px; font-weight: 500; color: var(--muted); margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .form-row.three { grid-template-columns: 2fr 1fr 1fr; }
+  select, input[type=text], input[type=number], textarea {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 9px 12px;
+    width: 100%;
+    transition: border-color 0.15s;
+  }
+  select:focus, input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  textarea { resize: none; height: 64px; }
+  .add-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: opacity 0.15s;
+  }
+  .add-btn:hover { opacity: 0.88; }
+  .add-btn:active { opacity: 0.75; }
+
+  /* stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+  }
+  .stat-card .num {
+    font-size: 26px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    color: var(--text);
+  }
+  .stat-card .lbl {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+
+  /* subject bars */
+  .subject-section { margin-bottom: 24px; }
+  .subject-section h3 { font-size: 13px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+  .subj-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .subj-name { font-size: 13px; width: 160px; flex-shrink: 0; color: var(--text); }
+  .bar-track { flex: 1; background: var(--surface2); border-radius: 99px; height: 8px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 99px; background: var(--accent); transition: width 0.4s ease; }
+  .subj-mins { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--muted); width: 52px; text-align: right; flex-shrink: 0; }
+
+  /* session log */
+  .log-section h3 { font-size: 13px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+  .session-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .session-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+  .session-body { flex: 1; }
+  .session-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 3px; }
+  .session-subject { font-size: 14px; font-weight: 500; }
+  .session-method { font-size: 12px; background: var(--surface2); color: var(--muted); padding: 2px 8px; border-radius: 99px; }
+  .session-meta { font-size: 12px; color: var(--muted); }
+  .session-notes { font-size: 13px; color: var(--muted); margin-top: 5px; font-style: italic; }
+  .session-delete {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 2px 6px;
+    border-radius: 6px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: color 0.15s;
+  }
+  .session-delete:hover { color: var(--red); }
+  .empty-state { text-align: center; color: var(--muted); font-size: 14px; padding: 32px 0; }
+
+  /* subject colours */
+  .s-eng-lang   { background: #7c6af7; }
+  .s-eng-lit    { background: #a78bf9; }
+  .s-biology    { background: #3ecf8e; }
+  .s-chemistry  { background: #60a5fa; }
+  .s-physics    { background: #38bdf8; }
+  .s-maths      { background: #f5a623; }
+  .s-geography  { background: #4ade80; }
+  .s-rs         { background: #f472b6; }
+  .s-spanish    { background: #fb923c; }
+  .s-food       { background: #e879f9; }
+
+  /* tabs */
+  .tabs { display: flex; gap: 6px; margin-bottom: 20px; }
+  .tab-btn {
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .tab-btn.active { background: var(--surface2); color: var(--text); border-color: var(--accent); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .exam-chip {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    font-weight: 500;
+  }
+  .exam-soon { background: var(--red-dim); color: var(--red); }
+  .exam-upcoming { background: var(--amber-dim); color: var(--amber); }
+  .exam-later { background: var(--green-dim); color: var(--green); }
+
+  .exam-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .exam-row:last-child { border-bottom: none; }
+  .exam-date { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); width: 80px; flex-shrink: 0; }
+  .exam-subj { font-size: 14px; font-weight: 500; flex: 1; }
+  .exam-paper { font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Ollie's revision tracker</h1>
+    <p id="header-date">loading...</p>
+  </div>
+  <div class="total-pill" id="total-pill">0h 0m total</div>
+</header>
+
+<div class="main">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('log')">Log session</button>
+    <button class="tab-btn" onclick="switchTab('progress')">Progress</button>
+    <button class="tab-btn" onclick="switchTab('exams')">Exam dates</button>
+  </div>
+
+  <!-- LOG TAB -->
+  <div class="tab-panel active" id="tab-log">
+    <div class="date-bar">
+      <label>Date</label>
+      <input type="date" id="session-date">
+    </div>
+
+    <div class="add-card">
+      <h2>Add a session</h2>
+      <div class="form-row">
+        <select id="subj-select">
+          <option value="">Subject...</option>
+          <option value="English Language">English Language</option>
+          <option value="English Literature">English Literature</option>
+          <option value="Biology">Biology</option>
+          <option value="Chemistry">Chemistry</option>
+          <option value="Physics">Physics</option>
+          <option value="Mathematics">Mathematics</option>
+          <option value="Geography">Geography</option>
+          <option value="Religious Studies">Religious Studies</option>
+          <option value="Spanish">Spanish</option>
+          <option value="Food & Nutrition">Food &amp; Nutrition</option>
+        </select>
+        <select id="method-select">
+          <option value="">Method...</option>
+          <option value="Brain dump">Brain dump</option>
+          <option value="Past paper">Past paper</option>
+          <option value="CGP / notes">CGP / notes</option>
+          <option value="Flashcards">Flashcards</option>
+          <option value="Cover say check">Cover, say, check</option>
+          <option value="Writing practice">Writing practice</option>
+          <option value="Mark scheme review">Mark scheme review</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-row three">
+        <input type="text" id="topic-input" placeholder="Topic (e.g. Cell biology definitions)">
+        <input type="number" id="mins-input" placeholder="Minutes" min="5" max="300">
+        <select id="feel-select">
+          <option value="">Felt...</option>
+          <option value="solid">Solid</option>
+          <option value="ok">Ok</option>
+          <option value="struggled">Struggled</option>
+        </select>
+      </div>
+      <textarea id="notes-input" placeholder="Notes (optional — what did you learn? what gaps did you find?)"></textarea>
+      <button class="add-btn" onclick="addSession()">+ Log this session</button>
+    </div>
+
+    <div class="log-section">
+      <h3 id="log-heading">Today's sessions</h3>
+      <div id="session-list"></div>
+    </div>
+  </div>
+
+  <!-- PROGRESS TAB -->
+  <div class="tab-panel" id="tab-progress">
+    <div class="stats-row" id="stats-row"></div>
+    <div class="subject-section">
+      <h3>Time per subject (all time)</h3>
+      <div id="subject-bars"></div>
+    </div>
+    <div class="log-section">
+      <h3>All sessions</h3>
+      <div id="all-sessions-list"></div>
+    </div>
+  </div>
+
+  <!-- EXAMS TAB -->
+  <div class="tab-panel" id="tab-exams">
+    <div id="exam-list"></div>
+  </div>
+</div>
+
+<script>
+const SUBJECTS = {
+  'English Language': 's-eng-lang',
+  'English Literature': 's-eng-lit',
+  'Biology': 's-biology',
+  'Chemistry': 's-chemistry',
+  'Physics': 's-physics',
+  'Mathematics': 's-maths',
+  'Geography': 's-geography',
+  'Religious Studies': 's-rs',
+  'Spanish': 's-spanish',
+  'Food & Nutrition': 's-food'
+};
+
+const EXAMS = [
+  { date: '2026-05-06', subject: 'English Language', paper: 'Reading 11', time: '13:30' },
+  { date: '2026-05-08', subject: 'English Literature', paper: 'Poetry & Prose', time: '9:00' },
+  { date: '2026-05-11', subject: 'English Literature', paper: 'Drama (Open Text)', time: '9:00' },
+  { date: '2026-05-12', subject: 'Religious Studies', paper: 'Christianity & Islam', time: '9:00' },
+  { date: '2026-05-12', subject: 'Biology', paper: 'Paper 1 Tier H', time: '13:30' },
+  { date: '2026-05-13', subject: 'Geography', paper: 'Physical Environment', time: '9:00' },
+  { date: '2026-05-14', subject: 'Mathematics', paper: 'Written Paper 1H', time: '9:00' },
+  { date: '2026-05-18', subject: 'Chemistry', paper: 'Paper 1 Tier H', time: '9:00' },
+  { date: '2026-05-20', subject: 'Religious Studies', paper: 'Paper 2A Excl Text', time: '13:30' },
+  { date: '2026-05-21', subject: 'English Language', paper: 'Directed Writing & Comp 21', time: '13:30' },
+  { date: '2026-06-02', subject: 'Physics', paper: 'Paper 1 Tier H', time: '9:00' },
+  { date: '2026-06-03', subject: 'Mathematics', paper: 'Written Paper 2H', time: '9:00' },
+  { date: '2026-06-03', subject: 'Geography', paper: 'Human Environment', time: '13:30' },
+  { date: '2026-06-08', subject: 'Biology', paper: 'Paper 2 Tier H', time: '9:00' },
+  { date: '2026-06-09', subject: 'Spanish', paper: 'Listening + Reading & Writing', time: '9:00' },
+  { date: '2026-06-11', subject: 'Geography', paper: 'Investigations', time: '9:00' },
+  { date: '2026-06-11', subject: 'Food & Nutrition', paper: 'Written', time: '13:30' },
+  { date: '2026-06-12', subject: 'Chemistry', paper: 'Paper 2 Tier H', time: '9:00' },
+  { date: '2026-06-15', subject: 'Physics', paper: 'Paper 2 Tier H', time: '9:00' },
+];
+
+function getSessions() {
+  try { return JSON.parse(localStorage.getItem('rev_sessions') || '[]'); } catch { return []; }
+}
+function saveSessions(s) { localStorage.setItem('rev_sessions', JSON.stringify(s)); }
+
+function todayStr() {
+  return new Date().toISOString().slice(0,10);
+}
+
+function formatDate(d) {
+  return new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
+}
+
+function daysUntil(dateStr) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const target = new Date(dateStr + 'T00:00:00');
+  return Math.round((target - today) / 86400000);
+}
+
+function subjectClass(s) {
+  return SUBJECTS[s] || 's-eng-lang';
+}
+
+function renderSessionItem(s, idx, showDelete) {
+  const dot = subjectClass(s.subject);
+  const feelMap = { solid: '✓ Solid', ok: '~ Ok', struggled: '! Struggled' };
+  return `<div class="session-item">
+    <div class="session-dot ${dot}"></div>
+    <div class="session-body">
+      <div class="session-top">
+        <span class="session-subject">${s.subject}</span>
+        <span class="session-method">${s.method}</span>
+        ${s.feel ? `<span class="session-method">${feelMap[s.feel]||s.feel}</span>` : ''}
+      </div>
+      <div class="session-meta">${s.topic ? s.topic + ' · ' : ''}${s.mins} min · ${formatDate(s.date)}</div>
+      ${s.notes ? `<div class="session-notes">${s.notes}</div>` : ''}
+    </div>
+    ${showDelete ? `<button class="session-delete" onclick="deleteSession(${idx})" title="Delete">×</button>` : ''}
+  </div>`;
+}
+
+function renderLog() {
+  const dateVal = document.getElementById('session-date').value || todayStr();
+  const sessions = getSessions().filter(s => s.date === dateVal);
+  const heading = document.getElementById('log-heading');
+  heading.textContent = dateVal === todayStr() ? "Today's sessions" : `Sessions on ${formatDate(dateVal)}`;
+  const list = document.getElementById('session-list');
+  if (!sessions.length) {
+    list.innerHTML = '<div class="empty-state">No sessions logged for this day yet.</div>';
+    return;
+  }
+  const all = getSessions();
+  list.innerHTML = sessions.map((s, i) => {
+    const globalIdx = all.findIndex((x,xi) => JSON.stringify(x) === JSON.stringify(s) && xi >= 0);
+    return renderSessionItem(s, all.indexOf(s), true);
+  }).join('');
+}
+
+function renderProgress() {
+  const sessions = getSessions();
+  const totalMins = sessions.reduce((a,s) => a + (parseInt(s.mins)||0), 0);
+  const totalH = Math.floor(totalMins/60);
+  const totalM = totalMins % 60;
+  const todaySessions = sessions.filter(s => s.date === todayStr());
+  const todayMins = todaySessions.reduce((a,s) => a + (parseInt(s.mins)||0), 0);
+  const streak = calcStreak(sessions);
+
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card"><div class="num">${totalH}h ${totalM}m</div><div class="lbl">total revised</div></div>
+    <div class="stat-card"><div class="num">${Math.floor(todayMins/60)}h ${todayMins%60}m</div><div class="lbl">today</div></div>
+    <div class="stat-card"><div class="num">${sessions.length}</div><div class="lbl">sessions</div></div>
+    <div class="stat-card"><div class="num">${streak}</div><div class="lbl">day streak</div></div>
+  `;
+  document.getElementById('total-pill').textContent = `${totalH}h ${totalM}m total`;
+
+  const bySubj = {};
+  sessions.forEach(s => {
+    bySubj[s.subject] = (bySubj[s.subject]||0) + (parseInt(s.mins)||0);
+  });
+  const max = Math.max(...Object.values(bySubj), 1);
+  const subjHTML = Object.entries(bySubj).sort((a,b)=>b[1]-a[1]).map(([subj, mins]) => {
+    const pct = Math.round(mins/max*100);
+    const h = Math.floor(mins/60), m = mins%60;
+    return `<div class="subj-bar">
+      <div class="subj-name">${subj}</div>
+      <div class="bar-track"><div class="bar-fill ${subjectClass(subj)}" style="width:${pct}%"></div></div>
+      <div class="subj-mins">${h>0?h+'h ':''}${m}m</div>
+    </div>`;
+  }).join('');
+  document.getElementById('subject-bars').innerHTML = subjHTML || '<div class="empty-state">No data yet.</div>';
+
+  const allList = document.getElementById('all-sessions-list');
+  if (!sessions.length) {
+    allList.innerHTML = '<div class="empty-state">No sessions logged yet.</div>';
+  } else {
+    allList.innerHTML = [...sessions].reverse().map((s,i) => renderSessionItem(s, sessions.length-1-i, false)).join('');
+  }
+}
+
+function calcStreak(sessions) {
+  if (!sessions.length) return 0;
+  const days = [...new Set(sessions.map(s=>s.date))].sort().reverse();
+  const today = todayStr();
+  let streak = 0, check = today;
+  for (let d of days) {
+    if (d === check) { streak++; const dt = new Date(check+'T12:00:00'); dt.setDate(dt.getDate()-1); check = dt.toISOString().slice(0,10); }
+    else if (d < check) break;
+  }
+  return streak;
+}
+
+function renderExams() {
+  const today = todayStr();
+  const html = EXAMS.map(e => {
+    const d = daysUntil(e.date);
+    let chip, label;
+    if (d < 0) { chip = 'exam-later'; label = 'done'; }
+    else if (d === 0) { chip = 'exam-soon'; label = 'TODAY'; }
+    else if (d <= 3) { chip = 'exam-soon'; label = `${d}d`; }
+    else if (d <= 10) { chip = 'exam-upcoming'; label = `${d}d`; }
+    else { chip = 'exam-later'; label = `${d}d`; }
+    return `<div class="exam-row">
+      <div class="exam-date">${formatDate(e.date)}</div>
+      <div>
+        <div class="exam-subj" style="display:flex;align-items:center;gap:8px;">
+          <span class="session-dot ${subjectClass(e.subject)}" style="display:inline-block;width:8px;height:8px;border-radius:50%;flex-shrink:0"></span>
+          ${e.subject}
+        </div>
+        <div class="exam-paper">${e.paper} · ${e.time}</div>
+      </div>
+      <span class="exam-chip ${chip}">${label}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('exam-list').innerHTML = html;
+}
+
+function addSession() {
+  const subj = document.getElementById('subj-select').value;
+  const method = document.getElementById('method-select').value;
+  const topic = document.getElementById('topic-input').value.trim();
+  const mins = parseInt(document.getElementById('mins-input').value);
+  const feel = document.getElementById('feel-select').value;
+  const notes = document.getElementById('notes-input').value.trim();
+  const date = document.getElementById('session-date').value || todayStr();
+  if (!subj || !method || !mins || mins < 1) { alert('Please fill in subject, method and minutes.'); return; }
+  const sessions = getSessions();
+  sessions.push({ subj, subject: subj, method, topic, mins, feel, notes, date, id: Date.now() });
+  saveSessions(sessions);
+  document.getElementById('subj-select').value = '';
+  document.getElementById('method-select').value = '';
+  document.getElementById('topic-input').value = '';
+  document.getElementById('mins-input').value = '';
+  document.getElementById('feel-select').value = '';
+  document.getElementById('notes-input').value = '';
+  renderLog();
+  renderProgress();
+}
+
+function deleteSession(idx) {
+  if (!confirm('Delete this session?')) return;
+  const sessions = getSessions();
+  sessions.splice(idx, 1);
+  saveSessions(sessions);
+  renderLog();
+  renderProgress();
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  event.target.classList.add('active');
+  if (name === 'progress') renderProgress();
+  if (name === 'exams') renderExams();
+}
+
+// init
+document.getElementById('session-date').value = todayStr();
+document.getElementById('session-date').addEventListener('change', renderLog);
+document.getElementById('header-date').textContent = new Date().toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
+renderLog();
+renderProgress();
+</script>
+</body>
+</html>
