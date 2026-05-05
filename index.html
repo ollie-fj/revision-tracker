@@ -2417,7 +2417,14 @@ function buildDayCol(date, compact=false) {
   const ds = fd(date);
   const isToday = ds === today();
   const dayExams = EXAMS.map((e,i)=>({...e,_idx:i})).filter(e=>e.date===ds);
-  const dayTasks = tasks.filter(t=>t.date===ds);
+  const dayTasks = tasks.filter(t=>t.date===ds).sort((a,b)=>{
+    const ta = a.time||'';
+    const tb = b.time||'';
+    if(!ta && !tb) return 0;
+    if(!ta) return 1;
+    if(!tb) return -1;
+    return ta < tb ? -1 : ta > tb ? 1 : 0;
+  });
 
   const col = document.createElement('div');
   const isPast = ds < today() && !isToday;
@@ -2457,14 +2464,13 @@ function buildDayCol(date, compact=false) {
   const body = document.createElement('div');
   body.className = 'day-body';
 
-  // Exam entry cards
-  dayExams.forEach(ex => {
+  // Build exam entry elements with their time for sorting
+  const examElements = dayExams.map(ex => {
     const subj = subjById(ex.subject);
     const d = daysUntil(ex.date);
     const dc = daysColor(d);
     const dl = daysLabel(d);
 
-    // Compute end time from start time + duration
     let endTimeStr = '';
     if(ex.time && ex.duration) {
       const durMins = parseDuration(ex.duration);
@@ -2495,13 +2501,27 @@ function buildDayCol(date, compact=false) {
 
     entry.addEventListener('dragstart', e=>onExamDragStart(e, ex._idx));
     entry.addEventListener('dragend', onExamDragEnd);
-    body.appendChild(entry);
+    return { el: entry, time: ex.time || '' };
   });
 
+  // Merge exams + tasks sorted by start time, tasks without time go last
   if(!compact) {
-    dayTasks.forEach(task => {
-      body.appendChild(buildTaskCard(task));
+    const taskElements = dayTasks.map(task => ({ el: buildTaskCard(task), time: task.time || '' }));
+    const allItems = [...examElements, ...taskElements].sort((a, b) => {
+      if(!a.time && !b.time) return 0;
+      if(!a.time) return 1;
+      if(!b.time) return -1;
+      return a.time < b.time ? -1 : a.time > b.time ? 1 : 0;
     });
+    allItems.forEach(item => body.appendChild(item.el));
+  } else {
+    // Compact view: exams only, sorted by time
+    examElements.sort((a,b) => {
+      if(!a.time && !b.time) return 0;
+      if(!a.time) return 1;
+      if(!b.time) return -1;
+      return a.time < b.time ? -1 : a.time > b.time ? 1 : 0;
+    }).forEach(item => body.appendChild(item.el));
   }
 
   col.appendChild(body);
@@ -3473,14 +3493,16 @@ function renderBalanceWarning() {
   };
 
   const data = SUBJECTS.map(s => {
-    const upcoming = tasks.filter(t => {
+    const allSubjTasks = tasks.filter(t => t.subjectId===s.id);
+    const doneTasks = allSubjTasks.filter(t => t.done).length;
+    const upcoming = allSubjTasks.filter(t => {
       const td = new Date(t.date); td.setHours(0,0,0,0);
-      return t.subjectId===s.id && !t.done && td>=now && td<=twoWeeksOut;
+      return !t.done && td>=now && td<=twoWeeksOut;
     }).length;
     const nextExam = EXAMS.filter(e=>e.subject===s.id && daysUntil(e.date)>=0)
       .sort((a,b)=>new Date(a.date)-new Date(b.date))[0];
     const daysToExam = nextExam ? daysUntil(nextExam.date) : 999;
-    return {s, upcoming, daysToExam};
+    return {s, upcoming, doneTasks, daysToExam};
   });
 
   const warnings = data.filter(d=>d.daysToExam<=14 && d.upcoming<2 && d.daysToExam>=0);
@@ -3490,17 +3512,23 @@ function renderBalanceWarning() {
     return;
   }
 
-  wrap.innerHTML = warnings.map(({s, upcoming, daysToExam}) => {
+  wrap.innerHTML = warnings.map(({s, upcoming, doneTasks, daysToExam}) => {
     const isCrit = daysToExam<=7;
     const col = isCrit?'var(--red)':'var(--amber)';
     const bg = isCrit?'rgba(248,113,113,.1)':'rgba(251,191,36,.08)';
     const border = isCrit?'rgba(248,113,113,.25)':'rgba(251,191,36,.2)';
     const icon = EMOJI_MAP[s.id]||'📚';
     const urgency = isCrit?'🚨 URGENT':'⚠️ Low';
+    const doneLabel = doneTasks > 0
+      ? `<span style="color:var(--green);font-weight:700">${doneTasks} done</span> · `
+      : '';
+    const leftLabel = upcoming > 0
+      ? `<span style="color:${col};font-weight:700">${upcoming} left</span>`
+      : `<span style="color:var(--muted)">0 left</span>`;
     return `<div style="padding:7px 9px;border-radius:7px;background:${bg};border:1px solid ${border};margin-bottom:5px;display:flex;justify-content:space-between;align-items:center;gap:6px">
       <div>
         <div style="font-size:11px;font-weight:700;color:${col};font-family:var(--font-body)">${icon} ${s.short}</div>
-        <div style="font-size:9px;color:var(--muted);font-family:var(--font-mono);margin-top:1px">${upcoming} task${upcoming!==1?'s':''} · exam in ${daysToExam}d</div>
+        <div style="font-size:9px;color:var(--muted);font-family:var(--font-mono);margin-top:1px">${doneLabel}${leftLabel} · exam in ${daysToExam}d</div>
       </div>
       <span style="font-size:8px;font-weight:700;color:${col};font-family:var(--font-mono);white-space:nowrap">${urgency}</span>
     </div>`;
