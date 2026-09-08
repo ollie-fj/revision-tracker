@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Oliver's Revision Tracker — Summer 2026</title>
+<title>Bea's Revision Tracker — Summer 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"/>
@@ -36,6 +36,14 @@
   --green:#059669;--amber:#d97706;--red:#dc2626;--pink:#db2777;
   --exam-red:#dc2626;--exam-red-bg:#dc262618;--exam-red-border:#dc262645;
 }
+[data-theme="pink_petal"]{
+  --bg:#fff0f6;--surface:#fff6fa;--card:#ffffff;--card2:#ffe6f1;
+  --border:#ffd1e6;--border2:#ffb8da;
+  --text:#5a2142;--muted:#c1698f;--faint:#ffe0ee;
+  --accent:#ec4899;--accent2:#f9a8d4;--accent-glow:#ec489944;
+  --green:#10b981;--amber:#e8a13a;--red:#e2477a;--pink:#f472b6;
+  --exam-red:#e2477a;--exam-red-bg:#e2477a18;--exam-red-border:#e2477a45;
+}
 html,body{height:100%;overflow:hidden}
 body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
 
@@ -64,7 +72,8 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-si
 .sb-section{margin-bottom:16px}
 
 /* ── THEME BTNS ───────────────────────────────────────────── */
-.theme-row{display:flex;gap:4px;margin-bottom:4px}
+.theme-row{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px}
+.theme-row .theme-btn{flex:1 1 calc(50% - 4px);min-width:70px}
 .theme-btn{flex:1;padding:5px 4px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-size:10px;font-family:var(--font-body);transition:all .2s}
 .theme-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 
@@ -753,13 +762,13 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-si
 </div>
 
 <!-- LEVEL UP BANNER -->
-<div id="levelup-banner" id="levelup-banner">⚡ LEVEL UP! You reached <span id="levelup-name"></span>! Keep smashing it Oliver! 🔥</div>
+<div id="levelup-banner" id="levelup-banner">⚡ LEVEL UP! You reached <span id="levelup-name"></span>! Keep smashing it Bea! 🔥</div>
 
 <!-- MEGA CELEBRATION OVERLAY -->
 <div id="mega-overlay">
   <div class="mega-card" id="mega-card">
     <span class="mega-emoji">🎉</span>
-    <div class="mega-title">ALL DONE, OLIVER!</div>
+    <div class="mega-title">ALL DONE, BEA!</div>
     <div class="mega-sub">Every single task completed. You absolute legend. 🏆</div>
     <button class="mega-close" onclick="closeMegaCelebration()">Let's go!! 🚀</button>
   </div>
@@ -769,7 +778,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-si
 <div id="focus-overlay">
   <div style="text-align:center;margin-bottom:1.6rem">
     <div style="font-family:var(--font-head);font-size:22px;font-weight:800;color:var(--text)">Focus Mode</div>
-    <div style="font-size:12px;color:var(--muted);margin-top:4px;font-family:var(--font-mono)">All distractions eliminated · You've got this, Oliver.</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:4px;font-family:var(--font-mono)">All distractions eliminated · You've got this, Bea.</div>
   </div>
   <div id="focus-quote" style="max-width:400px;text-align:center;margin-bottom:1.6rem;padding:14px 20px;background:var(--card);border:1px solid var(--border2);border-radius:12px">
     <div id="focus-quote-text" style="font-size:13px;font-style:italic;color:var(--text);line-height:1.6;font-family:var(--font-body)"></div>
@@ -823,7 +832,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-si
   <aside id="sidebar">
     <div class="sb-head">
       <div class="sb-title">Revision Tracker</div>
-      <div class="sb-sub" id="sb-stats">Oliver Fulford-Jones · #8447</div>
+      <div class="sb-sub" id="sb-stats">Bea · #8447</div>
     </div>
     <div id="xp-bar-wrap">
       <div class="xp-row">
@@ -858,6 +867,7 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-si
           <button class="theme-btn active" onclick="setTheme('deep_space',this)">Deep Space</button>
           <button class="theme-btn" onclick="setTheme('cyber',this)">Cyberpunk</button>
           <button class="theme-btn" onclick="setTheme('light',this)">Minimal</button>
+          <button class="theme-btn" onclick="setTheme('pink_petal',this)">Pink Petal</button>
         </div>
       </div>
       <div class="sb-section">
@@ -1043,7 +1053,8 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-si
 
     // Background gradient
     const grad = ctx.createRadialGradient(W*0.4, H*0.4, 0, W*0.5, H*0.5, W*0.8);
-    const isDark = !document.body.getAttribute('data-theme')?.includes('light');
+    const currentThemeName = document.body.getAttribute('data-theme');
+    const isDark = !(currentThemeName?.includes('light') || currentThemeName === 'pink_petal');
     if(isDark) {
       grad.addColorStop(0, '#0a0a1f');
       grad.addColorStop(0.5, '#06060f');
@@ -1111,37 +1122,21 @@ body{font-family:var(--font-body);background:var(--bg);color:var(--text);font-si
 const SUBJECTS = [
   {id:'engLang', name:'English Language', short:'Eng Lang', board:'CIE', color:'#3b82f6'},
   {id:'engLit',  name:'English Literature', short:'Eng Lit', board:'CIE', color:'#06b6d4'},
-  {id:'rs',      name:'Religious Studies', short:'RS', board:'AQA', color:'#f59e0b'},
   {id:'bio',     name:'Biology', short:'Biology', board:'AQA', color:'#22c55e'},
-  {id:'geo',     name:'Geography', short:'Geography', board:'Edexcel', color:'#84cc16'},
   {id:'maths',   name:'Mathematics', short:'Maths', board:'Edexcel', color:'#818cf8'},
-  {id:'chem',    name:'Chemistry', short:'Chemistry', board:'AQA', color:'#f97316'},
   {id:'phys',    name:'Physics', short:'Physics', board:'AQA', color:'#ec4899'},
-  {id:'span',    name:'Spanish', short:'Spanish', board:'Edexcel', color:'#ef4444'},
-  {id:'food',    name:'Food & Nutrition', short:'Food', board:'AQA', color:'#d946ef'},
 ];
 
 const EXAMS = [
   {date:'2026-05-06',time:'13:30',subject:'engLang',label:'Reading 11',duration:'120 min'},
   {date:'2026-05-08',time:'09:00',subject:'engLit', label:'Poetry & Prose',duration:'90 min'},
   {date:'2026-05-11',time:'09:00',subject:'engLit', label:'Drama (Open Text)',duration:'45 min'},
-  {date:'2026-05-12',time:'09:00',subject:'rs',     label:'P1 Christianity',duration:'N/A'},
-  {date:'2026-05-12',time:'09:00',subject:'rs',     label:'P1 Islam',duration:'N/A'},
   {date:'2026-05-12',time:'13:30',subject:'bio',    label:'Paper 1 (Tier H)',duration:'105 min'},
-  {date:'2026-05-13',time:'09:00',subject:'geo',    label:'Physical Environment',duration:'105 min'},
   {date:'2026-05-14',time:'09:00',subject:'maths',  label:'Paper 1H',duration:'120 min'},
-  {date:'2026-05-18',time:'09:00',subject:'chem',   label:'Paper 1 (Tier H)',duration:'105 min'},
-  {date:'2026-05-20',time:'13:30',subject:'rs',     label:'P2A Excl. Text',duration:'105 min'},
   {date:'2026-05-21',time:'13:30',subject:'engLang',label:'Directed Writing & Comp 21',duration:'120 min'},
   {date:'2026-06-02',time:'09:00',subject:'phys',   label:'Paper 1 (Tier H)',duration:'105 min'},
   {date:'2026-06-03',time:'09:00',subject:'maths',  label:'Paper 2H',duration:'120 min'},
-  {date:'2026-06-03',time:'13:30',subject:'geo',    label:'Human Environment',duration:'90 min'},
   {date:'2026-06-08',time:'09:00',subject:'bio',    label:'Paper 2 (Tier H)',duration:'105 min'},
-  {date:'2026-06-09',time:'09:00',subject:'span',   label:'Listening',duration:'35 min'},
-  {date:'2026-06-09',time:'09:00',subject:'span',   label:'Reading & Writing',duration:'105 min'},
-  {date:'2026-06-11',time:'09:00',subject:'geo',    label:'Investigations',duration:'90 min'},
-  {date:'2026-06-11',time:'13:30',subject:'food',   label:'Written Exam',duration:'105 min'},
-  {date:'2026-06-12',time:'09:00',subject:'chem',   label:'Paper 2 (Tier H)',duration:'105 min'},
   {date:'2026-06-15',time:'09:00',subject:'phys',   label:'Paper 2 (Tier H)',duration:'105 min'},
 ];
 
@@ -2429,7 +2424,7 @@ const LEVELS = [
   {min:220, max:360, name:'Elite'},
   {min:360, max:540, name:'Legend'},
   {min:540, max:800, name:'GOATed'},
-  {min:800, max:Infinity, name:'Oliver Mode 🔥'},
+  {min:800, max:Infinity, name:'Bea Mode 🔥'},
 ];
 let xp = parseInt(localStorage.getItem('rvt_xp')||'0');
 let comboCount = 0;
@@ -3986,12 +3981,13 @@ function makePieCard(dateStr, subjMins, total) {
     });
     // Donut hole
     ctx2.beginPath(); ctx2.arc(cx,cy,innerR,0,Math.PI*2);
-    ctx2.fillStyle = theme==='light'?'#f8f8fc':theme==='soft_dark'?'#1a1a2e':'#0d0d1a';
+    const isLightTheme = theme==='light'||theme==='pink_petal';
+    ctx2.fillStyle = isLightTheme?'#f8f8fc':theme==='soft_dark'?'#1a1a2e':'#0d0d1a';
     ctx2.fill();
     // Centre label
     const h=Math.floor(total/60), m2=Math.round(total%60);
     const lbl = h>0 ? h+'h'+(m2?m2+'m':'') : Math.round(total)+'m';
-    ctx2.fillStyle = theme==='light'?'#1a1a2e':'#e8e8f0';
+    ctx2.fillStyle = isLightTheme?'#1a1a2e':'#e8e8f0';
     ctx2.font = 'bold 12px system-ui'; ctx2.textAlign='center'; ctx2.textBaseline='middle';
     ctx2.fillText(lbl,cx,cy);
   }, 0);
@@ -4332,7 +4328,7 @@ function updateDailyRing() {
 let lastMilestone = '';
 const MILESTONES = [
   {count:1, emoji:'🚀', title:'First one down!', sub:'The hardest step is starting.'},
-  {count:3, emoji:'🔥', title:'3 tasks crushed!', sub:'You\'re on fire, Oliver!'},
+  {count:3, emoji:'🔥', title:'3 tasks crushed!', sub:'You\'re on fire, Bea!'},
   {count:5, emoji:'⚡', title:'5 tasks! BEAST MODE', sub:'You\'re absolutely smashing it.'},
   {count:10, emoji:'👑', title:'10 TASKS DONE!', sub:'Absolute legend status achieved.'},
   {count:15, emoji:'🐐', title:'15 tasks! GOAT', sub:'Greatest of all time. Facts.'},
@@ -4340,7 +4336,7 @@ const MILESTONES = [
 const PCT_MILESTONES = [
   {pct:25, emoji:'💪', title:'25% done!', sub:'Quarter of the way there!'},
   {pct:50, emoji:'🎯', title:'Halfway there!', sub:'You\'re halfway to winning.'},
-  {pct:75, emoji:'🌟', title:'75%! So close!', sub:'One final push, Oliver!'},
+  {pct:75, emoji:'🌟', title:'75%! So close!', sub:'One final push, Bea!'},
   {pct:100, emoji:'🏆', title:'ALL DONE TODAY!', sub:'Perfect score. Unreal.'},
 ];
 
